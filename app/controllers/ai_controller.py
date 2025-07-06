@@ -129,7 +129,7 @@ def call_ollama(prompt, system=None):
     response.raise_for_status()
     return response.json()
 
-# @firebase_auth_required
+@firebase_auth_required
 def proofread():
     """
     Proofread a given text and return suggestions for corrections.
