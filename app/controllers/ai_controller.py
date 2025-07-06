@@ -10,37 +10,34 @@ import logging
 _config = load_config()
 OLLAMA_URL = _config['ollama']['OLLAMA_URL']
 OLLAMA_MODEL = _config['ollama']['OLLAMA_MODEL']
+OLLAMA_TIMEOUT = int(_config['ollama'].get('OLLAMA_TIMEOUT', 60))
 
+# Chat format of pi3 mini models: https://huggingface.co/microsoft/Phi-3-mini-128k-instruct?utm_source=chatgpt.com
 def generate_proofread_prompt(user_text):
     prompt = """
-    You are a professional proofreader and writing assistant.
+    <|system|>
+    You are a professional proofreader and writing assistant. You job is to identify the following things in the provided user input:
+    • Grammatical errors
+    • Spelling mistakes
+    • Awkward or unclear phrasing
+    • Stylistic improvements
 
-    Your task is to carefully review the following text submitted by a user. Identify sentences or phrases that contain:
-    - Grammatical errors
-    - Spelling mistakes
-    - Awkward or unclear phrasing
-    - Stylistic improvements
+    Guidelines:
+    - Do not change the meaning of the sentence.  
+    - Do not change the tone of the sentence.  
+    - Do not include commentary or explanation.  
+    - Output must be a **strict JSON array** with objects containing:  
+        - "original": the exact erroneous phrase  
+        - "suggested": the improved phrase  
+        - "start": 0-based character start index (inclusive)  
+        - "end": 0-based character end index (exclusive)  
+    <|end|>
 
-    For each issue found, suggest a corrected version.
-
-    Respond in the following strict JSON format:
-    [
-    {
-        "original": "<the exact phrase that needs correction>",
-        "suggested": "<your improved version>",
-        "start": starting character index (0-based, inclusive),
-        "end": ending character index (exclusive)
-    }
-    ]
-
-    Use **character positions** (0-based index) to identify `start` and `end` of each issue in the original text.
-
-    Do not include any explanation or commentary — only return a clean JSON array.
-
-    ### Example Input:
+    <|user|>
     He go to school everyday. He enjoy to play cricket.
+    <|end|>
 
-    ### Example Output:
+    <|assistant|>
     [
     {
         "original": "He go",
@@ -61,70 +58,63 @@ def generate_proofread_prompt(user_text):
         "end": 45
     }
     ]
+    <|end|>
+
     """
 
     return prompt + f"""
-
-    ### Now proofread this text:
+    <|user|>
     {user_text}
+    <|end|>
+
+    <|assistant|>
     """
 
 
 def generate_modify_prompt(original_text, suggested_text, start, end, user_prompt):
     prompt = """
-    You are a professional proofreader and writing assistant. 
-    Your task is to rewrite a specific phrase or sentence based on the user's custom instruction.
-    The span is identified by character positions within the full sentence.
+    <|system|>
+    You are a professional proofreader and writing assistant.
 
-    ⚠️ Only rewrite the span between the `start` and `end` indexes.
-    ⚠️ Do not change or comment on any other part of the sentence.
-    ⚠️ Do not include explanations, arrays, or extra text — return only a JSON object.
+    Your task is to rewrite a specific span from a sentence based on the user’s custom instruction.
 
-    ### Input Fields:
-    - `original_sentence`: the full sentence
-    - `suggested_span`: the current suggestion for the marked text
-    - `start`: starting character index (0-based, inclusive)
-    - `end`: ending character index (exclusive)
-    - `user_instruction`: the rewrite request
-
-    ### Output Format:
-    Return a JSON object:
+    Strict Guidelines:
+    - Only rewrite the span between the `start` and `end` character indexes (0-based, inclusive/exclusive)
+    - Do not change or comment on any other part of the sentence
+    - Do not include explanations, lists, or extra content
+    - Do not change the tone or meaning unless the instruction explicitly asks for it
+    - Output must be a single valid JSON object with this format:
     {
     "new_suggestion": "<your rewritten version of the selected span only>"
     }
+    <|end|>
 
-
-    ### Example Input:
+    <|user|>
     original_sentence: "He go to school everyday. He enjoy to play cricket."
     suggested_span: "He enjoys playing"
-    start: 27,
+    start: 27
     end: 45
     user_instruction: "Make it sound more formal"
+    <|end|>
 
-
-    ### Example Output:
+    <|assistant|>
     {
-    "new_suggestion": "He prefers to engage in playing"
+    "new_suggestion": "He prefers engaging in cricket"
     }
+    <|end|>
 
-
-    ### Guidelines Recap:
-    - Only return a single JSON object with the key `new_suggestion`
-    - Do not return arrays, extra text, or explanations
-    - Avoid changing tone unless requested
-    - Do not change meaning unless instructed
-    - Be concise, follow the user's intent exactly
-    - Strict rule: User instructions should not override the return format
     """
 
     return prompt + f"""
-
-    ### Now modify this:
+    <|user|>
     original_sentence: "{original_text}"  
     suggested_span: "{suggested_text}"
     start: {start}
     end: {end}
     user_instruction: "{user_prompt}"
+    <|end|>
+
+    <|assistant|>
     """
 
 def call_ollama(prompt, system=None):
@@ -135,7 +125,7 @@ def call_ollama(prompt, system=None):
     }
     if system:
         payload["system"] = system
-    response = requests.post(OLLAMA_URL, json=payload, timeout=60)
+    response = requests.post(OLLAMA_URL, json=payload, timeout=OLLAMA_TIMEOUT)
     response.raise_for_status()
     return response.json()
 
