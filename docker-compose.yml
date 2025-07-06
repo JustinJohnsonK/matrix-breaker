@@ -17,10 +17,11 @@ services:
       - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
-    command: ["/bin/sh", "-c", "ollama pull phi3 && ollama serve"]
+      - ./ollama-entrypoint.sh:/ollama-entrypoint.sh
+    entrypoint: /ollama-entrypoint.sh
   backend:
     build: .
-    command: ["./wait-for-it.sh", "db", "5432", "--", "python", "app/main.py"]
+    command: ./wait-for-it.sh db 5432 -- flask run --host=0.0.0.0 --port=5000
     volumes:
       - .:/app
     ports:

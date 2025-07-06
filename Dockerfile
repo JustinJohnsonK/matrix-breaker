@@ -6,4 +6,6 @@ RUN apt-get update && apt-get install -y netcat-openbsd && pip install --no-cach
 COPY . .
 RUN chmod +x wait-for-it.sh
 EXPOSE 5000
-CMD ["./wait-for-it.sh", "db", "5432", "--", "python", "app/main.py"]
+ENV FLASK_APP=app/main.py
+ENV FLASK_ENV=development
+CMD ["./wait-for-it.sh", "db", "5432", "--", "flask", "run", "--host=0.0.0.0", "--port=5000"]

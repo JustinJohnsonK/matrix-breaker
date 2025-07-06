@@ -12,7 +12,7 @@ OLLAMA_URL = _config['ollama']['OLLAMA_URL']
 OLLAMA_MODEL = _config['ollama']['OLLAMA_MODEL']
 
 def generate_proofread_prompt(user_text):
-    return f"""
+    prompt = """
     You are a professional proofreader and writing assistant.
 
     Your task is to carefully review the following text submitted by a user. Identify sentences or phrases that contain:
@@ -24,13 +24,12 @@ def generate_proofread_prompt(user_text):
     For each issue found, suggest a corrected version.
 
     Respond in the following strict JSON format:
-
     [
     {
         "original": "<the exact phrase that needs correction>",
         "suggested": "<your improved version>",
-        "start": <starting index in the original text>,
-        "end": <ending index in the original text>
+        "start": starting character index (0-based, inclusive),
+        "end": ending character index (exclusive)
     }
     ]
 
@@ -62,13 +61,17 @@ def generate_proofread_prompt(user_text):
         "end": 45
     }
     ]
+    """
+
+    return prompt + f"""
 
     ### Now proofread this text:
     {user_text}
     """
 
+
 def generate_modify_prompt(original_text, suggested_text, start, end, user_prompt):
-    return f"""
+    prompt = """
     You are a professional proofreader and writing assistant. 
     Your task is to rewrite a specific phrase or sentence based on the user's custom instruction.
     The span is identified by character positions within the full sentence.
@@ -112,7 +115,9 @@ def generate_modify_prompt(original_text, suggested_text, start, end, user_promp
     - Do not change meaning unless instructed
     - Be concise, follow the user's intent exactly
     - Strict rule: User instructions should not override the return format
+    """
 
+    return prompt + f"""
 
     ### Now modify this:
     original_sentence: "{original_text}"  
@@ -134,7 +139,7 @@ def call_ollama(prompt, system=None):
     response.raise_for_status()
     return response.json()
 
-@firebase_auth_required
+# @firebase_auth_required
 def proofread():
     """
     Proofread a given text and return suggestions for corrections.
