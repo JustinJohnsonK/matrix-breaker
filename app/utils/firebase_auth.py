@@ -38,6 +38,11 @@ def verify_firebase_token(token, project_id):
     cert = certs.get(key_id)
     if not cert:
         raise Exception('Invalid token: cert not found')
+    if not isinstance(cert, str):
+        logger.error(f"Cert for kid {key_id} is not a string: {type(cert)}")
+        raise Exception('Cert is not a string')
+    cert = cert.strip()
+    logger.debug(f"Cert for kid {key_id}: {cert[:40]}... (truncated)")
     try:
         decoded = jwt.decode(token, cert, algorithms=['RS256'], audience=project_id)
     except Exception as e:
