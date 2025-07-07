@@ -45,6 +45,7 @@ def verify_firebase_token(token, project_id):
     logger.info(f"Cert for kid {key_id} length: {len(cert)}")
     logger.info(f"Cert for kid {key_id} start: {cert[:40]}")
     logger.info(f"Cert for kid {key_id} end: {cert[-40:]}")
+    logger.info(f"Cert for kid {key_id} repr: {repr(cert)}")
     if not cert.startswith('-----BEGIN CERTIFICATE-----') or not cert.endswith('-----END CERTIFICATE-----'):
         logger.error(f"Cert for kid {key_id} does not have valid PEM markers.")
     try:
@@ -66,6 +67,7 @@ def firebase_auth_required(f):
         from config import load_config
         config = load_config()
         project_id = config['auth']['FIREBASE_PROJECT_ID']
+        logger.info(f'Using Firebase project ID: {project_id}')
         try:
             decoded = verify_firebase_token(token, project_id)
             request.firebase_user = decoded
