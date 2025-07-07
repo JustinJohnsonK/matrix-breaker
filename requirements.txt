@@ -1,7 +1,8 @@
-Flask
-Flask_SQLAlchemy
-psycopg2-binary
-python-dotenv
-requests
-PyJWT
-pytest
+Flask==3.0.3
+Flask_SQLAlchemy==3.1.1
+psycopg2-binary==2.9.9
+python-dotenv==1.0.1
+requests==2.31.0
+PyJWT==2.8.0
+cryptography==42.0.0
+pytest==8.2.2

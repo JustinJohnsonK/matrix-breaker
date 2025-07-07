@@ -29,11 +29,20 @@ def get_firebase_certs():
 def verify_firebase_token(token, project_id):
     certs = get_firebase_certs()
     header = jwt.get_unverified_header(token)
+    logger.debug(f"JWT header: {header}")
+    alg = header.get('alg')
+    if alg != 'RS256':
+        logger.error(f"JWT uses unsupported algorithm: {alg}")
+        raise Exception(f'Unsupported JWT algorithm: {alg}')
     key_id = header['kid']
     cert = certs.get(key_id)
     if not cert:
         raise Exception('Invalid token: cert not found')
-    decoded = jwt.decode(token, cert, algorithms=['RS256'], audience=project_id)
+    try:
+        decoded = jwt.decode(token, cert, algorithms=['RS256'], audience=project_id)
+    except Exception as e:
+        logger.error(f"JWT decode error: {e}")
+        raise
     return decoded
 
 
