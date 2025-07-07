@@ -5,12 +5,15 @@ import jwt
 from flask import request, abort
 from functools import wraps
 import time
+from app.utils.logger import get_logger
 
 FIREBASE_PROJECT_ID = None
 FIREBASE_CERTS_URL = 'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com'
 
 _cached_certs = None
 _cached_certs_expiry = 0
+
+logger = get_logger(__name__)
 
 
 def get_firebase_certs():
@@ -39,6 +42,7 @@ def firebase_auth_required(f):
     def decorated(*args, **kwargs):
         auth = request.headers.get('Authorization', None)
         if not auth or not auth.startswith('Bearer '):
+            logger.warning('Missing or invalid Authorization header')
             abort(401, 'Missing or invalid Authorization header')
         token = auth.split(' ')[1]
         from config import load_config
@@ -48,6 +52,7 @@ def firebase_auth_required(f):
             decoded = verify_firebase_token(token, project_id)
             request.firebase_user = decoded
         except Exception as e:
+            logger.error(f'Invalid token: {str(e)}')
             abort(401, f'Invalid token: {str(e)}')
         return f(*args, **kwargs)
     return decorated
