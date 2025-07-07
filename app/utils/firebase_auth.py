@@ -42,7 +42,11 @@ def verify_firebase_token(token, project_id):
         logger.error(f"Cert for kid {key_id} is not a string: {type(cert)}")
         raise Exception('Cert is not a string')
     cert = cert.strip()
-    logger.debug(f"Cert for kid {key_id}: {cert[:40]}... (truncated)")
+    logger.info(f"Cert for kid {key_id} length: {len(cert)}")
+    logger.info(f"Cert for kid {key_id} start: {cert[:40]}")
+    logger.info(f"Cert for kid {key_id} end: {cert[-40:]}")
+    if not cert.startswith('-----BEGIN CERTIFICATE-----') or not cert.endswith('-----END CERTIFICATE-----'):
+        logger.error(f"Cert for kid {key_id} does not have valid PEM markers.")
     try:
         decoded = jwt.decode(token, cert, algorithms=['RS256'], audience=project_id)
     except Exception as e:
