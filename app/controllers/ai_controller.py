@@ -23,14 +23,14 @@ def generate_proofread_prompt(user_text):
     • Awkward or unclear phrasing
 
     Guidelines:
-    - Do not change the meaning of the sentence.  
-    - Do not change the tone of the sentence.  
-    - Do not include commentary or explanation.  
+    - Do not change the meaning of the sentence.
+    - Do not change the tone of the sentence.
+    - Do not include commentary or explanation.
     - Output must be a **strict JSON array** with objects containing:
-        - "original": the exact erroneous phrase  
-        - "suggested": the improved phrase  
-        - "start": 0-based character start index (inclusive)  
-        - "end": 0-based character end index (exclusive)  
+        - "original": the exact erroneous phrase
+        - "suggested": the improved phrase
+        - "start": 0-based character start index of original
+        - "end": 0-based character end index of original
     - The json format should always be in this format:
         [
             {
@@ -49,28 +49,34 @@ def generate_proofread_prompt(user_text):
     <|end|>
 
     <|user|>
-    He go to school everyday. He enjoy to play cricket.
+    He go to school everyday, He enjoy to play cricket.
     <|end|>
 
     <|assistant|>
     [
     {
-        "original": "He go",
-        "suggested": "He goes",
-        "start": 0,
-        "end": 6
+        "original": "go",
+        "suggested": "goes",
+        "start": 3,
+        "end": 4
     },
     {
         "original": "everyday",
         "suggested": "every day",
-        "start": 17,
-        "end": 25
+        "start": 16,
+        "end": 23
     },
     {
-        "original": "He enjoy to play",
-        "suggested": "He enjoys playing",
-        "start": 27,
-        "end": 45
+        "original": ",",
+        "suggested": ".",
+        "start": 24,
+        "end": 24
+    },
+    {
+        "original": "enjoy to play",
+        "suggested": "enjoys playing",
+        "start": 29,
+        "end": 41
     }
     ]
     <|end|>
@@ -99,15 +105,15 @@ def generate_modify_prompt(original_text, suggested_text, start, end, user_promp
     - Do not change the tone or meaning unless the instruction explicitly asks for it
     - Output must be a single valid JSON object only with this format:
     {
-    "new_suggestion": "<your rewritten version of the selected span only>"
+    "new_suggestion": "<new rewritten version of the selected span only>"
     }
     <|end|>
 
     <|user|>
     original_sentence: "He go to school everyday. He enjoy to play cricket."
     suggested_span: "He enjoys playing"
-    start: 27
-    end: 45
+    start: 26
+    end: 41
     user_instruction: "Make it sound more formal"
     <|end|>
 
