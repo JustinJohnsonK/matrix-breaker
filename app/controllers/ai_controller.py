@@ -6,6 +6,7 @@ import requests
 from config import load_config
 import json
 import logging
+import re
 
 _config = load_config()
 OLLAMA_URL = _config['ollama']['OLLAMA_URL']
@@ -20,17 +21,31 @@ def generate_proofread_prompt(user_text):
     • Grammatical errors
     • Spelling mistakes
     • Awkward or unclear phrasing
-    • Stylistic improvements
 
     Guidelines:
     - Do not change the meaning of the sentence.  
     - Do not change the tone of the sentence.  
     - Do not include commentary or explanation.  
-    - Output must be a **strict JSON array** with objects containing:  
+    - Output must be a **strict JSON array** with objects containing:
         - "original": the exact erroneous phrase  
         - "suggested": the improved phrase  
         - "start": 0-based character start index (inclusive)  
         - "end": 0-based character end index (exclusive)  
+    - The json format should always be in this format:
+        [
+            {
+            "original": String,
+            "suggested": String,
+            "start": Integer,
+            "end": Integer
+            },
+            {
+            "original": String,
+            "suggested": String,
+            "start": Integer,
+            "end": Integer
+            }
+        ] 
     <|end|>
 
     <|user|>
@@ -70,7 +85,6 @@ def generate_proofread_prompt(user_text):
     <|assistant|>
     """
 
-
 def generate_modify_prompt(original_text, suggested_text, start, end, user_prompt):
     prompt = """
     <|system|>
@@ -83,7 +97,7 @@ def generate_modify_prompt(original_text, suggested_text, start, end, user_promp
     - Do not change or comment on any other part of the sentence
     - Do not include explanations, lists, or extra content
     - Do not change the tone or meaning unless the instruction explicitly asks for it
-    - Output must be a single valid JSON object with this format:
+    - Output must be a single valid JSON object only with this format:
     {
     "new_suggestion": "<your rewritten version of the selected span only>"
     }
@@ -129,6 +143,48 @@ def call_ollama(prompt, system=None):
     response.raise_for_status()
     return response.json()
 
+def clean_llm_json(raw):
+    """
+    Remove trailing commas before closing brackets in JSON arrays/objects.
+    """
+    return re.sub(r',\s*([}\]])', r'\1', raw)
+
+def extract_json_from_text(text):
+    """
+    Extract the first valid JSON array or object from a string.
+    Handles code blocks, commentary, and extra text.
+    """
+    # Remove code block markers if present
+    text = re.sub(r'```(?:json)?', '', text, flags=re.IGNORECASE).strip()
+    # Try to find the first JSON array or object
+    match = re.search(r'(\[.*?\]|\{.*?\})', text, re.DOTALL)
+    if match:
+        return match.group(1)
+    return text
+
+def validate_suggestion(s):
+    """
+    Validate and coerce a suggestion dict to the expected schema.
+    Returns a valid dict or None if invalid.
+    """
+    if not isinstance(s, dict):
+        return None
+    try:
+        original = str(s.get('original', ''))
+        suggested = str(s.get('suggested', ''))
+        start = int(s.get('start', 0))
+        end = int(s.get('end', 0))
+        if not original or not suggested:
+            return None
+        return {
+            'original': original,
+            'suggested': suggested,
+            'start': start,
+            'end': end
+        }
+    except Exception:
+        return None
+
 @firebase_auth_required
 def proofread():
     """
@@ -146,16 +202,28 @@ def proofread():
     prompt = generate_proofread_prompt(user_text=text)
     try:
         ollama_response = call_ollama(prompt)
-        # Try to parse the LLM's response as JSON array
         suggestions = []
         raw = ollama_response.get("response", "[]")
+        parsed = None
+        # Try direct JSON parse first
         try:
-            suggestions = json.loads(raw)
-            if not isinstance(suggestions, list):
-                suggestions = []
-        except Exception as e:
-            logging.error(f"Failed to parse LLM response as JSON array: {e}, raw: {raw}")
-            suggestions = []
+            parsed = json.loads(raw)
+        except Exception:
+            # Try cleaning and extracting JSON if direct parse fails
+            try:
+                cleaned = clean_llm_json(raw)
+                extracted = extract_json_from_text(cleaned)
+                parsed = json.loads(extracted)
+            except Exception as e:
+                logging.error(f"Failed to parse LLM response as JSON array: {e}, raw: {raw}")
+                parsed = []
+        # Normalize to list
+        if isinstance(parsed, dict):
+            parsed = [parsed]
+        if not isinstance(parsed, list):
+            parsed = []
+        # Validate and coerce all suggestions
+        suggestions = [s for s in (validate_suggestion(x) for x in parsed) if s]
         return jsonify({
             "original_text": text,
             "suggestions": suggestions
