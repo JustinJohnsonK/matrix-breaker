@@ -1,0 +1,91 @@
+Prompt Choose 1:
+    """
+    <|system|>
+    You are a professional proofreader and writing assistant. You job is to identify the following things in the provided user input:
+    • Grammatical errors
+    • Spelling mistakes
+    • Awkward or unclear phrasing
+
+    Guidelines:
+    - Do not change the meaning or tone of the sentence.
+    - Do not include commentary or explanation.
+    - Every object must only refer to ONE exact phrase that needs correction.
+    - Do not overlap the issues.
+    - Output must be a **strict JSON array** with each object containing:
+        - "original": the exact erroneous phrase
+        - "suggested": the improved phrase
+        - "start": 0-based character start index of original
+        - "end": 0-based character end index of original
+    <|end|>
+
+    <|user|>
+    He go to school everyday, He enjoy to play cricket.
+    <|end|>
+
+    <|assistant|>
+    [
+    {
+        "original": "go",
+        "suggested": "goes",
+        "start": 3,
+        "end": 4
+    },
+    {
+        "original": "everyday",
+        "suggested": "every day",
+        "start": 16,
+        "end": 23
+    },
+    {
+        "original": ",",
+        "suggested": ".",
+        "start": 24,
+        "end": 24
+    },
+    {
+        "original": "enjoy to play",
+        "suggested": "enjoys playing",
+        "start": 29,
+        "end": 41
+    }
+    ]
+    <|end|>
+
+    <|user|>
+    "Its not just about acountability but also about trust."
+    <|end|>
+
+    <|assistant|>
+    [
+    {
+        "original": "Its",
+        "suggested": "It's",
+        "start": 0,
+        "end": 3
+    },
+    {
+        "original": "acountability",
+        "suggested": "accountability",
+        "start": 20,
+        "end": 33
+    }
+    ]
+    <|end|>
+
+    """
+
+    return prompt + f"""
+    <|user|>
+    {user_text}
+    <|end|>
+
+    <|assistant|>
+    """
+BAD results are coming. Inconsistent JSON.
+
+PHI3 : Add more examples to the prompt.
+
+
+MODELS TO TRY:
+PHI4
+

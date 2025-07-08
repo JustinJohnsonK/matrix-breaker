@@ -17,7 +17,8 @@ OLLAMA_TIMEOUT = int(_config['ollama'].get('OLLAMA_TIMEOUT', 60))
 def generate_proofread_prompt(user_text):
     prompt = """
     <|system|>
-    You are a professional proofreader and writing assistant. You job is to identify the following things in the provided user input:
+    You are a professional proofreader and writing assistant. You job is to identify the following things in the provided user input and return the results in the specified JSON format only:
+    Identify:
     • Grammatical errors
     • Spelling mistakes
     • Awkward or unclear phrasing
@@ -26,26 +27,14 @@ def generate_proofread_prompt(user_text):
     - Do not change the meaning of the sentence.
     - Do not change the tone of the sentence.
     - Do not include commentary or explanation.
-    - Output must be a **strict JSON array** with objects containing:
+    - Do not merge multiple issues into a single correction.
+    - Every object must only refer to ONE exact phrase that needs correction.
+    - Do not overlap the issues.
+    - Output must be a strict JSON array with objects containing:
         - "original": the exact erroneous phrase
         - "suggested": the improved phrase
-        - "start": 0-based character start index of original
-        - "end": 0-based character end index of original
-    - The json format should always be in this format:
-        [
-            {
-            "original": String,
-            "suggested": String,
-            "start": Integer,
-            "end": Integer
-            },
-            {
-            "original": String,
-            "suggested": String,
-            "start": Integer,
-            "end": Integer
-            }
-        ] 
+        - "start": 0-based character start index of original (inclusive)
+        - "end": 0-based character end index of original (inclusive)
     <|end|>
 
     <|user|>
@@ -77,6 +66,39 @@ def generate_proofread_prompt(user_text):
         "suggested": "enjoys playing",
         "start": 29,
         "end": 41
+    }
+    ]
+    <|end|>
+
+    <|user|>
+    He explained me the topic in details. After that he returned back to the same exact place.
+    <|end|>
+
+    <|assistant|>
+    [
+    {
+        "original": "explained me",
+        "suggested": "explained to me",
+        "start": 3,
+        "end": 15
+    },
+    {
+        "original": "in details",
+        "suggested": "in detail",
+        "start": 27,
+        "end": 37
+    },
+    {
+        "original": "returned back",
+        "suggested": "returned",
+        "start": 52,
+        "end": 64
+    },
+    {
+        "original": "same exact",
+        "suggested": "exact",
+        "start": 73,
+        "end": 83
     }
     ]
     <|end|>
