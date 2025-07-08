@@ -202,13 +202,16 @@ def proofread():
     prompt = generate_proofread_prompt(user_text=text)
     try:
         ollama_response = call_ollama(prompt)
+        logging.info(f"Ollama response: {ollama_response}")
         suggestions = []
         raw = ollama_response.get("response", "[]")
+        logging.info(f"Ollama response RAW: {raw}")
         parsed = None
         # Try direct JSON parse first
         try:
             parsed = json.loads(raw)
-        except Exception:
+        except Exception as e:
+            logging.exception(f"Failed to parse LLM response as JSON array. raw: {raw}")
             # Try cleaning and extracting JSON if direct parse fails
             try:
                 cleaned = clean_llm_json(raw)
@@ -217,11 +220,15 @@ def proofread():
             except Exception as e:
                 logging.error(f"Failed to parse LLM response as JSON array: {e}, raw: {raw}")
                 parsed = []
+
+        logging.info(f"Parsed suggestions: {parsed}")
         # Normalize to list
         if isinstance(parsed, dict):
             parsed = [parsed]
         if not isinstance(parsed, list):
             parsed = []
+
+        logging.info(f"Parsed Normalize suggestion: {parsed}")
         # Validate and coerce all suggestions
         suggestions = [s for s in (validate_suggestion(x) for x in parsed) if s]
         return jsonify({
