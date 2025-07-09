@@ -2,5 +2,5 @@
 set -e
 ollama serve &
 sleep 2
-ollama pull phi3 || true
+ollama pull mistral:instruct || true
 wait $!

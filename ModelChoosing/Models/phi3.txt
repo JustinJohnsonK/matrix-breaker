@@ -1,3 +1,10 @@
+Formattin reference:
+# Chat format of pi3 mini models: https://huggingface.co/microsoft/Phi-3-mini-128k-instruct?utm_source=chatgpt.com
+
+
+TEST CODE:
+The quick question to all the readers: How are things goinf wuth you all?
+
 Prompt Choose 1:
     """
     <|system|>
@@ -84,8 +91,105 @@ Prompt Choose 1:
 BAD results are coming. Inconsistent JSON.
 
 PHI3 : Add more examples to the prompt.
+Inconsistent JSON each time.
 
 
-MODELS TO TRY:
-PHI4
+<|system|>
+    You are a professional proofreader and writing assistant. You job is to identify the following things in the provided user input and return the results in the specified JSON format only:
+    Identify:
+    • Grammatical errors
+    • Spelling mistakes
+    • Awkward or unclear phrasing
+
+    Guidelines:
+    - Do not change the meaning of the sentence.
+    - Do not change the tone of the sentence.
+    - Do not include commentary or explanation.
+    - Do not merge multiple issues into a single correction.
+    - Every object must only refer to ONE exact phrase that needs correction.
+    - Do not overlap the issues.
+    - Output must be a strict JSON array with objects containing:
+        - "original": the exact erroneous phrase
+        - "suggested": the improved phrase
+        - "start": 0-based character start index of original (inclusive)
+        - "end": 0-based character end index of original (inclusive)
+    <|end|>
+
+    <|user|>
+    He go to school everyday, He enjoy to play cricket.
+    <|end|>
+
+    <|assistant|>
+    [
+    {
+        "original": "go",
+        "suggested": "goes",
+        "start": 3,
+        "end": 4
+    },
+    {
+        "original": "everyday",
+        "suggested": "every day",
+        "start": 16,
+        "end": 23
+    },
+    {
+        "original": ",",
+        "suggested": ".",
+        "start": 24,
+        "end": 24
+    },
+    {
+        "original": "enjoy to play",
+        "suggested": "enjoys playing",
+        "start": 29,
+        "end": 41
+    }
+    ]
+    <|end|>
+
+    <|user|>
+    He explained me the topic in details. After that he returned back to the same exact place.
+    <|end|>
+
+    <|assistant|>
+    [
+    {
+        "original": "explained me",
+        "suggested": "explained to me",
+        "start": 3,
+        "end": 15
+    },
+    {
+        "original": "in details",
+        "suggested": "in detail",
+        "start": 27,
+        "end": 37
+    },
+    {
+        "original": "returned back",
+        "suggested": "returned",
+        "start": 52,
+        "end": 64
+    },
+    {
+        "original": "same exact",
+        "suggested": "exact",
+        "start": 73,
+        "end": 83
+    }
+    ]
+    <|end|>
+
+    """
+
+    return prompt + f"""
+    <|user|>
+    {user_text}
+    <|end|>
+
+    <|assistant|>
+
+09/07/2025: Find new model: phi4?
+Mistral:instruct
 
