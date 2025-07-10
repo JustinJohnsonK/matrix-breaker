@@ -198,3 +198,140 @@ cast away in s distant land, Munshi is in a very bad stage. His life is sick and
 ]
 
 
+10/07/2025 - Wednesday
+
+"""
+You are a professional proofreader.
+Identify the errors in grammar, spelling, punctuation, formatting, and word choice in the following sentence and return ONLY a JSON array of correction objects.
+Each correction object must fix only one issue and should not overlap with any other correction objects.
+Do not include comments or explanations.
+Each correction must follow this format:
+{
+"original": only the original phrase that needs correction in string format,
+"suggested": only your improved part of the original phrase in string format,
+"start": strict starting intex of the original text (0-based, inclusive) in integer format,
+"end": strict ending index of the original text (exclusive) in integer format
+}
+
+Example:
+<s>
+"[INST]She go to school everyday. He enjoy to play cricket.[/INST]"
+"[
+    {
+        "original": "go",
+        "suggested": "goes",
+        "start": 4,
+        "end": 6
+    },
+    {
+        "original": "everyday",
+        "suggested": "every day",
+        "start": 17,
+        "end": 25
+    },
+    {
+        "original": "enjoy to play",
+        "suggested": "enjoys playing",
+        "start": 30,
+        "end": 42
+    }
+]
+"</s>
+
+[INST]{user_text}[/INST]
+"""
+
+cast away in s distant land, Munshi is in a very bad stage. His life is sick and lost his family as well
+[
+    {
+        "original": "cast away",
+        "suggested": "cast away",
+        "start": 0,
+        "end": 7
+    },
+    {
+        "original": "in s distant land",
+        "suggested": "in a distant land",
+        "start": 8,
+        "end": 21
+    },
+    {
+        "original": "Munshi is in a very bad stage.",
+        "suggested": "Munshi is at a very critical point.",
+        "start": 23,
+        "end": 49
+    },
+    {
+        "original": "His life",
+        "suggested": "His health",
+        "start": 50,
+        "end": 53
+    },
+    {
+        "original": "is sick",
+        "suggested": "has deteriorated",
+        "start": 54,
+        "end": 58
+    },
+    {
+        "original": "and lost his family as well",
+        "suggested": ", and he has also lost his family.",
+        "start": 60,
+        "end": 74
+    }
+]
+
+RESULTS: Mismarch in start and end
+
+UPDATED with new instructions suggested by copilot:
+
+### Instruction:
+You are a professional proofreader. 
+Identify all errors in grammar, spelling, punctuation, formatting, and word choice in the following text. 
+For each error, return a JSON object with these fields:
+- "original": the exact substring from the text that needs correction,
+- "suggested": your improved version,
+- "start": the 0-based index in the text where the error starts (inclusive),
+- "end": the 0-based index where the error ends (exclusive).
+
+**Important:**
+- Use Python-style 0-based indexing.
+- Count every character, including spaces and punctuation.
+- For each correction, ensure that `original == text[start:end]`.
+- Do not overlap corrections.
+- Do not include explanations or comments.
+- Output ONLY a JSON array of correction objects.
+
+### Example:
+Text: She go to school everyday. He enjoy to play cricket.
+
+Output:
+[
+  {{
+    "original": "go",
+    "suggested": "goes",
+    "start": 4,
+    "end": 6
+  }},
+  {{
+    "original": "everyday",
+    "suggested": "every day",
+    "start": 17,
+    "end": 25
+  }},
+  {{
+    "original": "enjoy to play",
+    "suggested": "enjoys playing",
+    "start": 30,
+    "end": 42
+  }}
+]
+
+### Text:
+{text}
+
+### Response:
+"""
+
+
+

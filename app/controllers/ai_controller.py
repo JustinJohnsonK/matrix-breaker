@@ -17,22 +17,27 @@ logging.info(f"Loaded Ollama model: {OLLAMA_MODEL}")
 
 def generate_proofread_prompt(user_text):
     prompt = """
-        You are a professional proofreader.
-        Identify the errors in grammar, spelling, punctuation, formatting, and word choice in the following sentence and return ONLY a JSON array of correction objects.
-        Each correction object must fix only one issue and should not overlap with any other correction objects.
-        Do not include comments or explanations.
-        Each correction must follow this format:
-        {
-        "original": only the original phrase that needs correction in string format,
-        "suggested": only your improved part of the original phrase in string format,
-        "start": strict starting intex of the original text (0-based, inclusive) in integer format,
-        "end": strict ending index of the original text (exclusive) in integer format
-        }
+        ### Instruction:
+        You are a professional proofreader. 
+        Identify all errors in grammar, spelling, punctuation, formatting, and word choice in the following text. 
+        For each error, return a JSON object with these fields:
+        - "original": the exact substring from the text that needs correction,
+        - "suggested": your improved version,
+        - "start": the 0-based index in the text where the error starts (inclusive),
+        - "end": the 0-based index where the error ends (exclusive).
 
-        Example:
+        **Important:**
+        - Use Python-style 0-based indexing.
+        - Count every character, including spaces and punctuation.
+        - For each correction, ensure that `original == text[start:end]`.
+        - Do not overlap corrections.
+        - Do not include explanations or comments.
+        - Output ONLY a JSON array of correction objects.
+
+        ### Example:
         <s>
-        "[INST]She go to school everyday. He enjoy to play cricket.[/INST]"
-        "[
+        [INST]She go to school everyday. He enjoy to play cricket.[/INST]
+        [
             {
                 "original": "go",
                 "suggested": "goes",
@@ -49,17 +54,16 @@ def generate_proofread_prompt(user_text):
                 "original": "enjoy to play",
                 "suggested": "enjoys playing",
                 "start": 30,
-                "end": 42
+                "end": 43
             }
         ]
-        "</s>
+        </s>
 
         """
 
     return prompt + f"""
         [INST]{user_text}[/INST]
         """
-
 
 def generate_modify_prompt(original_text, suggested_text, start, end, user_prompt):
     prompt = (
