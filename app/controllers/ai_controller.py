@@ -29,28 +29,28 @@ def generate_proofread_prompt(user_text):
 
         Example:
         <s>
-        "[INST]She go to school everyday, He enjoy to play cricket.[/INST]"
+        "[INST]She go to school everyday. He enjoy to play cricket.[/INST]"
         "[
-        {
-            "original": "go",
-            "suggested": "goes",
-            "start": 4,
-            "end": 6
-        },
-        {
-            "original": "everyday",
-            "suggested": "every day",
-            "start": 19,
-            "end": 27
-        },
-        {
-            "original": "enjoy to play",
-            "suggested": "enjoys playing",
-            "start": 36,
-            "end": 50
-        }
-        ]"
-        </s>
+            {
+                "original": "go",
+                "suggested": "goes",
+                "start": 4,
+                "end": 6
+            },
+            {
+                "original": "everyday",
+                "suggested": "every day",
+                "start": 19,
+                "end": 27
+            },
+            {
+                "original": "enjoy to play",
+                "suggested": "enjoys playing",
+                "start": 36,
+                "end": 50
+            }
+        ]
+        "</s>
 
         """
 

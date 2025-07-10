@@ -90,3 +90,27 @@ Tryinh Instruction Format:
         """
 
 
+Problem:
+Considering new lines as different Instruction all together. giving relative start and end to sentence start.
+
+"original_text": "The quick question to all the readers. How are things goinf wuth you all?",
+"suggestions": [
+    {
+        "end": 18,
+        "original": "goinf",
+        "start": 14,
+        "suggested": "going"
+    },
+    {
+        "end": 23,
+        "original": "wuth",
+        "start": 20,
+        "suggested": "with"
+    },
+    {
+        "end": 14,
+        "original": "How are things ",
+        "start": 0,
+        "suggested": "How are things going"
+    }
+]
