@@ -114,3 +114,45 @@ Considering new lines as different Instruction all together. giving relative sta
         "suggested": "How are things going"
     }
 ]
+
+10/07/2025: Thursday
+New prompt:
+"""
+    You are a professional proofreader. Identify the errors in the following sentence and return ONLY a JSON array of corrections.
+    Each correction must fix only one issue and no overlapping of corrections. Do not include comments or explanations.
+    Each correction must follow this format:
+    {
+    "original": original phrase that needs correction in string format,
+    "suggested": your improved version of the original phrase in string format,
+    "start": starting intex of the original text (0-based, inclusive) in integer format,
+    "end": ending index of the original text (exclusive) in integer format
+    }
+
+    Example:
+    <s>
+    "[INST]She go to school everyday. He enjoy to play cricket.[/INST]"
+    "[
+        {
+            "original": "go",
+            "suggested": "goes",
+            "start": 4,
+            "end": 6
+        },
+        {
+            "original": "everyday",
+            "suggested": "every day",
+            "start": 17,
+            "end": 25
+        },
+        {
+            "original": "enjoy to play",
+            "suggested": "enjoys playing",
+            "start": 30,
+            "end": 42
+        }
+    ]
+    "</s>
+
+    [INST]{user_text}[/INST]
+"""
+
