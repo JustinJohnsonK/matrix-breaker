@@ -14,7 +14,6 @@ class User(db.Model):
     email = db.Column(db.String, unique=True, nullable=False)
     name = db.Column(db.String, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    reviews = db.relationship('Review', backref='user', lazy=True)
 
 class Review(db.Model):
     __tablename__ = 'reviews'

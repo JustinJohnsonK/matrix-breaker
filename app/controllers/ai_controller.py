@@ -123,13 +123,14 @@ def extract_json_from_text(text):
         return match.group(1)
     return text
 
-def validate_suggestion(s):
+def validate_suggestion(s, user_text: str):
     """
     Validate and coerce a suggestion dict to the expected schema.
     Returns a valid dict or None if invalid.
     """
     if not isinstance(s, dict):
         return None
+
     try:
         original = str(s.get('original', ''))
         suggested = str(s.get('suggested', ''))
@@ -137,14 +138,39 @@ def validate_suggestion(s):
         end = int(s.get('end', 0))
         if not original or not suggested:
             return None
-        return {
-            'original': original,
-            'suggested': suggested,
-            'start': start,
-            'end': end
-        }
+        
+        # 1. Check if original is present between start and end
+        if user_text[start:end] == original:
+            return {
+                'original': original,
+                'suggested': suggested,
+                'start': start,
+                'end': end
+            }
+        
+        # 2. Check if original is present between start and start + len(original)
+        alt_end = start + len(original)
+        if user_text[start:alt_end] == original:
+            return {
+                'original': original,
+                'suggested': suggested,
+                'start': start,
+                'end': alt_end
+            }
+        
+        # 3. Find all occurrences, pick the one closest to LLM's start
+        occurrences = [m.start() for m in re.finditer(re.escape(original), user_text)]
+        if occurrences:
+            closest = min(occurrences, key=lambda x: abs(x - start))
+            return {
+                'original': original,
+                'suggested': suggested,
+                'start': closest,
+                'end': closest + len(original)
+            }
     except Exception:
-        return None
+        logging.exception("Error validating suggestion")
+    return None
 
 @firebase_auth_required
 def proofread():
@@ -166,7 +192,6 @@ def proofread():
         logging.info(f"Ollama response: {ollama_response}")
         suggestions = []
         raw = ollama_response.get("response", "[]")
-        logging.info(f"Ollama response RAW: {raw}")
         parsed = None
         # Try direct JSON parse first
         try:
@@ -191,7 +216,7 @@ def proofread():
 
         logging.info(f"Parsed Normalize suggestion: {parsed}")
         # Validate and coerce all suggestions
-        suggestions = [s for s in (validate_suggestion(x) for x in parsed) if s]
+        suggestions = [s for s in (validate_suggestion(x, user_text=text) for x in parsed) if s]
         return jsonify({
             "original_text": text,
             "suggestions": suggestions
