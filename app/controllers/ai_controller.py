@@ -17,14 +17,16 @@ logging.info(f"Loaded Ollama model: {OLLAMA_MODEL}")
 
 def generate_proofread_prompt(user_text):
     prompt = """
-        You are a professional proofreader. Identify the errors in the following sentence and return ONLY a JSON array of corrections.
-        Each correction must fix only one issue and no overlapping of corrections. Do not include comments or explanations.
+        You are a professional proofreader.
+        Identify the errors in grammar, spelling, punctuation, formatting, and word choice in the following sentence and return ONLY a JSON array of correction objects.
+        Each correction object must fix only one issue and should not overlap with any other correction objects.
+        Do not include comments or explanations.
         Each correction must follow this format:
         {
-        "original": original phrase that needs correction in string format,
-        "suggested": your improved version of the original phrase in string format,
-        "start": starting intex of the original text (0-based, inclusive) in integer format,
-        "end": ending index of the original text (exclusive) in integer format
+        "original": only the original phrase that needs correction in string format,
+        "suggested": only your improved part of the original phrase in string format,
+        "start": strict starting intex of the original text (0-based, inclusive) in integer format,
+        "end": strict ending index of the original text (exclusive) in integer format
         }
 
         Example:

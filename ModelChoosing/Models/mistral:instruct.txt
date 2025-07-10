@@ -156,3 +156,45 @@ New prompt:
     [INST]{user_text}[/INST]
 """
 
+cast away in s distant land, Munshi is in a very bad stage. His life is sick and lost his family as well
+
+[
+{
+    "original": "cast away",
+    "suggested": "castaway",
+    "start": 0,
+    "end": 8
+},
+{
+    "original": "in",
+    "suggested": "",
+    "start": 9,
+    "end": 12
+},
+{
+    "original": "s distant land",
+    "suggested": "on a distant land",
+    "start": 13,
+    "end": 30
+},
+{
+    "original": "Munshi is in a very bad stage.",
+    "suggested": "Munshi is in a very bad situation.",
+    "start": 31,
+    "end": 54
+},
+{
+    "original": "His life is sick",
+    "suggested": "He is ill.",
+    "start": 55,
+    "end": 68
+},
+{
+    "original": "and lost his family as well",
+    "suggested": ", and he has also lost his family.",
+    "start": 70,
+    "end": 91
+}
+]
+
+
