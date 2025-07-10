@@ -35,8 +35,9 @@ def generate_proofread_prompt(user_text):
         - Output ONLY a JSON array of correction objects.
 
         ### Example:
-        <s>
-        [INST]She go to school everyday. He enjoy to play cricket.[/INST]
+        Text: She go to school everyday. He enjoy to play cricket.
+
+        Output:
         [
             {
                 "original": "go",
@@ -57,12 +58,14 @@ def generate_proofread_prompt(user_text):
                 "end": 43
             }
         ]
-        </s>
 
         """
 
     return prompt + f"""
-        [INST]{user_text}[/INST]
+        ### Text:
+        {user_text}
+
+        ### Response:
         """
 
 def generate_modify_prompt(original_text, suggested_text, start, end, user_prompt):
