@@ -29,7 +29,7 @@ def generate_proofread_prompt(user_text):
         **Important:**
         - Use Python-style 0-based indexing.
         - Count every character, including spaces and punctuation.
-        - For each correction, ensure that `original == text[start:end]`.
+        - For each correction, ensure that original == text[start:end].
         - Do not overlap corrections.
         - Do not include explanations or comments.
         - Output ONLY a JSON array of correction objects.
